@@ -1,13 +1,11 @@
-#include "Core.h"
+#include "AssembleComp.h"
 
 #include <iostream>
 
-namespace Core {
-
+namespace Assemble {
 	void PrintHelloWorld()
 	{
 		std::cout << "Hello World!\n";
 		std::cin.get();
 	}
-
 }

@@ -1,15 +1,31 @@
-project "Core"
-   kind "StaticLib"
+project "WrenchRuntime"
+   kind "ConsoleApp"
    language "C++"
    cppdialect "C++20"
    targetdir "Binaries/%{cfg.buildcfg}"
    staticruntime "off"
 
-   files { "Source/**.h", "Source/**.cpp" }
+   files { "Source/**.h", "Source/**.cpp", "Source/**.hpp" }
 
    includedirs
    {
-      "Source"
+      "Source",
+
+	  -- Include Assembler-Core
+	  "../Assembler-Core/Source",
+	  
+	  -- Include Parser-Core
+	  "../Parser-Core/Source",
+	  
+	  -- Include Preprocessor-Core
+	  "../Preprocessor-Core/Source"
+   }
+
+   links
+   {
+      "AssemblerCore",
+      "ParserCore",
+      "PreprocessorCore"
    }
 
    targetdir ("../Binaries/" .. OutputDir .. "/%{prj.name}")
@@ -17,7 +33,7 @@ project "Core"
 
    filter "system:windows"
        systemversion "latest"
-       defines { }
+       defines { "WINDOWS" }
 
    filter "configurations:Debug"
        defines { "DEBUG" }
