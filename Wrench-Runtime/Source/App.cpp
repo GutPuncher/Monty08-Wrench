@@ -2,9 +2,8 @@
 #include "Preprocessor/PreprocessComp.h"
 #include "Parser/ParseComp.h"
 
-int main()
-{
-	Assemble::PrintHelloWorld();
-	Parse::PrintHelloWorld();
-	Preprocess::PrintHelloWorld();
+int main(int argc, char** argv) {
+	Assemble::Assemble();
+
+	return 0;
 }
