@@ -7,5 +7,6 @@ namespace Assemble {
 		Parser ps{};
 		ps.LoadFromFile("sampleData/sample3.txt");
 		ps.Parse(true);
+		ps.Parse(false);
 	}
 }

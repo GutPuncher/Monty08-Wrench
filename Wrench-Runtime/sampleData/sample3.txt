@@ -1,1 +1,7 @@
-    #align .text   8
+#align .text 8
+#define aa bb
+org .bss 10
+
+section .data
+_test:
+	db "string"

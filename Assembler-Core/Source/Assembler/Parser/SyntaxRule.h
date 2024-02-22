@@ -1,7 +1,10 @@
 #pragma once
 
+#include "ParseTree.h"
+
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace Assemble {
 	struct ParseEvent;
@@ -23,7 +26,12 @@ namespace Assemble {
 		inline const void* GetBranch() { return branch; }
 		inline void SetBranch(void* branch) { this->branch = branch; }
 
+		inline const std::vector<AlignDir::Section>& AvailableInSection() const {
+			return partOfSection;
+		}
+
 	protected:
+		std::vector<AlignDir::Section> partOfSection;
 		std::string literal;
 		void* branch;
 	};
@@ -41,6 +49,11 @@ namespace Assemble {
 		std::string_view errorStatus;
 		std::string_view errorStr;
 		Severty severty;
+		AlignDir::Section sectionInit = AlignDir::Section::NONE;
+
+		std::string labelRef;
+		void* labelRefObj;
+		LabelPointer::DataType ptrType;
 
 		explicit operator bool() const {
 			return succeed;

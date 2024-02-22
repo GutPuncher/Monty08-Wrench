@@ -1,17 +1,21 @@
 
-
 #align TEXT 2
 #define Reg0 r0
 #define Reg1 r1
 
-ORG 1000h
+ORG .text 1000h
+
 section .bss
-_resByte: resb 21h
+_resByte: 
+	resb 21h
 
 section .data
-_format: db "Test"
-_blob1: db 00h AAh FFh
-_blob2: db 200d
+_format: 
+	db "Test"
+_blob1: 
+	db 00h AAh FFh
+_blob2: 
+	db 200d
 
 section .text
 	xchop

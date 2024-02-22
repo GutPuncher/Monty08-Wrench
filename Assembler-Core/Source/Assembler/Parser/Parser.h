@@ -19,12 +19,18 @@ namespace Assemble {
 
 	private:
 		void SetupRules();
+		inline bool MatchRuleSection(const std::vector<AlignDir::Section>& sections) const;
 
 	private:
 		ParseTree m_Tree;
 
 		std::string m_Path;
 		std::ifstream m_Source;
+		std::ifstream m_SourcePreprocess;
+
+		AlignDir::Section m_InSection = AlignDir::Section::NONE;
+		std::string m_LabelRefKey;
+		bool m_ToBeLabeled = false;
 
 		std::vector<SyntaxRule*> m_RuleRegistry;
 		std::vector<SyntaxRule*> m_RulePreprocessRegistry;
