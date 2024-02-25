@@ -13,7 +13,7 @@ namespace Assemble::Rule {
 		}
 		~PreprocessorDirective() = default;
 
-		virtual ParseEvent ParseLiteral(std::string_view lineLiteral) = 0;
+		virtual ParseEvent ParseLiteral(std::vector<std::string>& lineLiteral) = 0;
 
 	protected:
 		inline bool BeginsWithHash(std::string_view word) const;
@@ -27,7 +27,7 @@ namespace Assemble::Rule {
 		}
 		~ALIGN() = default;
 
-		virtual ParseEvent ParseLiteral(std::string_view lineLiteral) override;
+		virtual ParseEvent ParseLiteral(std::vector<std::string>& lineLiteral) override;
 	};
 
 	class DEFINE : public PreprocessorDirective {
@@ -38,7 +38,7 @@ namespace Assemble::Rule {
 		}
 		~DEFINE() = default;
 
-		virtual ParseEvent ParseLiteral(std::string_view lineLiteral) override;
+		virtual ParseEvent ParseLiteral(std::vector<std::string>& lineLiteral) override;
 	};
 
 	class ORG : public SyntaxRule {
@@ -49,7 +49,7 @@ namespace Assemble::Rule {
 		}
 		~ORG() = default;
 
-		virtual ParseEvent ParseLiteral(std::string_view lineLiteral) override;
+		virtual ParseEvent ParseLiteral(std::vector<std::string>& lineLiteral) override;
 	};
 
 	class Section : public SyntaxRule {
@@ -60,7 +60,7 @@ namespace Assemble::Rule {
 		}
 		~Section() = default;
 
-		virtual ParseEvent ParseLiteral(std::string_view lineLiteral) override;
+		virtual ParseEvent ParseLiteral(std::vector<std::string>& lineLiteral) override;
 	};
 
 	class Label : public SyntaxRule {
@@ -71,7 +71,7 @@ namespace Assemble::Rule {
 		}
 		~Label() = default;
 
-		virtual ParseEvent ParseLiteral(std::string_view lineLiteral) override;
+		virtual ParseEvent ParseLiteral(std::vector<std::string>& lineLiteral) override;
 	};
 
 	class DefineByte : public SyntaxRule {
@@ -82,7 +82,7 @@ namespace Assemble::Rule {
 		}
 		~DefineByte() = default;
 
-		virtual ParseEvent ParseLiteral(std::string_view lineLiteral) override;
+		virtual ParseEvent ParseLiteral(std::vector<std::string>& lineLiteral) override;
 	};
 
 	class ReserveByte : public SyntaxRule {
@@ -93,6 +93,17 @@ namespace Assemble::Rule {
 		}
 		~ReserveByte() = default;
 
-		virtual ParseEvent ParseLiteral(std::string_view lineLiteral) override;
+		virtual ParseEvent ParseLiteral(std::vector<std::string>& lineLiteral) override;
+	};
+
+	class InstructionDir : public SyntaxRule {
+	public:
+		explicit InstructionDir(void* branch)
+			: SyntaxRule(branch) {
+			partOfSection = { AlignDir::Section::TEXT };
+		}
+		~InstructionDir() = default;
+
+		virtual ParseEvent ParseLiteral(std::vector<std::string>& lineLiteral) override;
 	};
 }

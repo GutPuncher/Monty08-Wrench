@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <utility>
 
 namespace Assemble::Util {
 	size_t split(const std::string& str, std::vector<std::string>& outlist, char sep);
@@ -12,12 +13,6 @@ namespace Assemble::Util {
 	std::string mapStrSection(AlignDir::Section section);
 	std::string trim(const std::string& str, const std::string& whitespace = " \t");
 	std::string reduce(const std::string& str, const std::string& fill = " ", const std::string& whitespace = " \t");
-
-	struct InstructionInformation {
-		unsigned char opcode;
-		unsigned char opcParamCount;
-		unsigned char operandCount;
-	};
 
 	template <typename T>
 	struct ValueReturnObject {
@@ -34,6 +29,13 @@ namespace Assemble::Util {
 	{
 		char postfix = std::tolower(numberStr[numberStr.size() - 1]);
 		ValueReturnObject<T> vro{ true, 0 };
+
+		for (int i = 0; i < numberStr.size() - 1; i++) {
+			if (std::isdigit(numberStr[i]) == 0) {
+				vro.isValid = false;
+				return vro;
+			}
+		}
 
 		if (std::isdigit(postfix) > 0) {
 			vro.value = static_cast<T>(std::atoll(numberStr.c_str()));
@@ -62,4 +64,6 @@ namespace Assemble::Util {
 
 		return vro;
 	}
+
+	std::pair<Operand::Type, Operand*> dispatchOperand(std::string& word);
 }

@@ -18,7 +18,7 @@ namespace Assemble {
 			: branch(branch) {};
 		~SyntaxRule() = default;
 
-		virtual ParseEvent ParseLiteral(std::string_view lineLiteral) = 0;
+		virtual ParseEvent ParseLiteral(std::vector<std::string>& lineLiteral) = 0;
 
 		inline std::string_view GetLiteral() const { return literal; }
 		inline void SetLiteral(const std::string& literal) { this->literal = literal; }

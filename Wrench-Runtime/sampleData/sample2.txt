@@ -20,7 +20,7 @@ _blob2:
 section .text
 	xchop
 	ldrv r0 111d
-	jmp skip
+	jmp [skip]
 	end
 
 _skip:

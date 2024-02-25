@@ -2,13 +2,16 @@
 
 #include "Ruleset.h"
 #include "Util.h"
+#include "InstructionSet.h"
 
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 Assemble::Parser::Parser()
 {
 	SetupRules();
+	SetupInstructionData();
 }
 
 Assemble::Parser::~Parser()
@@ -47,11 +50,15 @@ bool Assemble::Parser::Parse(bool preprocess)
 		std::istringstream lineStream(line);
 		std::string terminal;
 
-		if (line.size() == 0) continue;
+		transform(line.begin(), line.end(), line.begin(), ::tolower);
+		std::vector<std::string> words{ 3 };
+		Util::split(Util::trim(std::string(line)), words, ' ');
+
+		if (line.size() == 0 || words.size() == 0) continue;
 
 		bool unknownID = true;
 		for (SyntaxRule* rule : ruleset) {
-			ParseEvent ev = rule->ParseLiteral(line);
+			ParseEvent ev = rule->ParseLiteral(words);
 
 			if (ev.triggered && ev) {
 				m_InSection = ev.sectionInit != AlignDir::Section::NONE ? ev.sectionInit : m_InSection;
@@ -126,6 +133,7 @@ void Assemble::Parser::SetupRules()
 	m_RuleRegistry.push_back(new Rule::Label(&m_Tree.labels));
 	m_RuleRegistry.push_back(new Rule::DefineByte(&m_Tree.sec_data.data));
 	m_RuleRegistry.push_back(new Rule::ReserveByte(&m_Tree.sec_bss.dataRes));
+	m_RuleRegistry.push_back(new Rule::InstructionDir(&m_Tree.sec_text.code));
 }
 
 inline bool Assemble::Parser::MatchRuleSection(const std::vector<AlignDir::Section>& sections) const
