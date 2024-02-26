@@ -8,6 +8,9 @@
 #include <sstream>
 #include <algorithm>
 
+#include <fmt/core.h>
+#include <fmt/color.h>
+
 Assemble::Parser::Parser()
 {
 	SetupRules();
@@ -26,8 +29,10 @@ bool Assemble::Parser::LoadFromFile(const std::string path)
 	m_Source = std::ifstream(path);
 	m_SourcePreprocess = std::ifstream(path);
 
+	std::cout << "Loading file for parsing: " + path + '\n';
+
 	if (!m_Source) {
-		std::cout << "Assembler/Parser [Error]: cannot load file " + path << "\n";
+		fmt::print(fg(fmt::color::crimson), "[Error]: Cannot load file {}\n", path);
 		return false;
 	}
 
@@ -41,17 +46,21 @@ bool Assemble::Parser::Parse(bool preprocess)
 		return false;
 	}
 
+	std::cout << "Parsing file. Preprocessor run: " << (preprocess ? "true\n" : "false\n");
+	std::cout << "----------------------------------------------\n";
+
 	size_t lineCount = 0;
 	std::string line;
 	auto& ruleset = preprocess ? m_RulePreprocessRegistry : m_RuleRegistry;
 	std::ifstream& stream = preprocess ? m_SourcePreprocess : m_Source;
 
 	while (std::getline(stream, line, '\n')) {
+		lineCount++;
 		std::istringstream lineStream(line);
 		std::string terminal;
 
 		transform(line.begin(), line.end(), line.begin(), ::tolower);
-		std::vector<std::string> words{ 3 };
+		std::vector<std::string> words{ 5 };
 		Util::split(Util::trim(std::string(line)), words, ' ');
 
 		if (line.size() == 0 || words.size() == 0) continue;
@@ -65,7 +74,13 @@ bool Assemble::Parser::Parse(bool preprocess)
 				unknownID = false;
 
 				if (!MatchRuleSection(rule->AvailableInSection())) {
-					std::cout << "The given keyword cannot be used inside the " + Util::mapStrSection(m_InSection) + " section.\n";
+					std::cout << "  -> " + line + '\n';
+
+					fmt::print(fg(fmt::color::crimson),
+						"[Error]: Line {0}: The given keyword cannot be used inside the {1} section.\n", lineCount, Util::mapStrSection(m_InSection));
+
+					fmt::print(fg(fmt::color::crimson),
+						"  -> {}\n", line);
 					return false;
 				}
 
@@ -89,21 +104,22 @@ bool Assemble::Parser::Parse(bool preprocess)
 				switch (ev.severty)
 				{
 				case ParseEvent::Severty::WARNING:
-					keyword = "warning";
+					keyword = "[Warning]:";
 					break;
 				case ParseEvent::Severty::MEDIUM:
-					keyword = "medium severty error";
+					keyword = "[Medium Severty Error]:";
 					break;
 				case ParseEvent::Severty::CRITICAL:
-					keyword = "error";
+					keyword = "[Error]:";
 					abort = true;
 				}
 
-				std::cout << "A(n) " + keyword + " occured while parsing the file \"" + m_Path + "\"\n";
-				std::cout << ev.errorStatus << '\n' << ev.errorStr << '\n';
+				fmt::print(fg(fmt::color::crimson),
+					"{0} Line {1}: {2}", keyword, std::to_string(lineCount), ev.errorStr);
+				if (ev.errorStatus.size()) fmt::print(fg(fmt::color::crimson), " (Status: {})", ev.errorStatus);
+				fmt::print(fg(fmt::color::crimson), "\n  -> {}\n", line);
 
 				if (abort) {
-					std::cout << "The assembly process had been aborted.\n";
 					return false;
 				}
 			}
@@ -111,13 +127,13 @@ bool Assemble::Parser::Parse(bool preprocess)
 
 		if (unknownID && !preprocess) {
 			if (Util::trim(line)[0] != '#') {
-				std::cout << "Unknown Identifier at line " << std::to_string(lineCount) << '\n';
+				fmt::print(fg(fmt::color::orange), "Unknown Identifier at line {} will be ignored.\n", std::to_string(lineCount));
+				fmt::print(fg(fmt::color::orange), "  -> {}\n", line);
 			}
 		}
-
-		lineCount++;
 	}
 
+	fmt::print(fg(fmt::color::green), "=> Successfully parsed file {0} for Configuration: Preprocessor run: {1}", m_Path, (preprocess ? "true\n\n" : "false\n\n"));
 	return true;
 }
 

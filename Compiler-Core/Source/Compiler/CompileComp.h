@@ -1,5 +1,5 @@
 #pragma once
 
-namespace Preprocess {
+namespace Compile {
 	void PrintHelloWorld();
 }

@@ -12,8 +12,9 @@ OutputDir = "%{cfg.system}-%{cfg.architecture}/%{cfg.buildcfg}"
 
 group "Core"
 	include "Assembler-Core/Build-Core.lua"
-	include "Parser-Core/Build-Core.lua"
-	include "Preprocessor-Core/Build-Core.lua"
+	include "Compiler-Core/Build-Core.lua"
 group ""
 
 include "Wrench-Runtime/Build-App.lua"
+
+

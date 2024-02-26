@@ -14,18 +14,16 @@ project "WrenchRuntime"
 	  -- Include Assembler-Core
 	  "../Assembler-Core/Source",
 	  
-	  -- Include Parser-Core
-	  "../Parser-Core/Source",
+	  -- Include Compiler-Core
+	  "../Compiler-Core/Source",
 	  
-	  -- Include Preprocessor-Core
-	  "../Preprocessor-Core/Source"
+	  "../Vendor/fmt/include"
    }
 
    links
    {
       "AssemblerCore",
-      "ParserCore",
-      "PreprocessorCore"
+      "CompilerCore"
    }
 
    targetdir ("../Binaries/" .. OutputDir .. "/%{prj.name}")

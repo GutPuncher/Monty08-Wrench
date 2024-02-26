@@ -1,8 +1,8 @@
-#include "PreprocessComp.h"
+#include "CompileComp.h"
 
 #include <iostream>
 
-namespace Preprocess {
+namespace Compile {
 	void PrintHelloWorld()
 	{
 		std::cout << "Hello World!\n";

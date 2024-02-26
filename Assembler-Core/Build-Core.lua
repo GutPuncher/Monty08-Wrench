@@ -5,11 +5,12 @@ project "AssemblerCore"
    targetdir "Binaries/%{cfg.buildcfg}"
    staticruntime "off"
 
-   files { "Source/**.h", "Source/**.cpp", "Source/**.hpp" }
+   files { "Source/**.h", "Source/**.cpp", "Source/**.hpp", 
+   		"../Vendor/fmt/include/core.h", "../Vendor/fmt/include/format.h", "../Vendor/fmt/include/format-inl.h", "../Vendor/fmt/src/format.cc" }
 
    includedirs
    {
-      "Source"
+      "Source", "../Vendor/fmt/include"
    }
 
    targetdir ("../Binaries/" .. OutputDir .. "/%{prj.name}")

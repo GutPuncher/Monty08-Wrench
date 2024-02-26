@@ -4,9 +4,10 @@
 #include "ParseTree.h"
 #include "InstructionSet.h"
 
+#include <fmt/core.h>
+
 inline bool Assemble::Rule::PreprocessorDirective::BeginsWithHash(std::string_view word) const
 {
-	if (word.size() == 0) return false;
 	return word[0] == '#';
 }
 
@@ -17,6 +18,13 @@ Assemble::ParseEvent Assemble::Rule::DEFINE::ParseLiteral(std::vector<std::strin
 	if (BeginsWithHash(lineLiteral[0])) {
 		if (lineLiteral[0].substr(1, lineLiteral[0].size() - 1) == literal) {
 			pe.triggered = true;
+
+			if (lineLiteral.size() != 3) {
+				pe.severty = ParseEvent::Severty::CRITICAL;
+				pe.errorStr = fmt::format("Incorrect operands. The define-directive takes two operands: {} given.", std::to_string(lineLiteral.size() - 1));
+				return pe;
+			}
+
 			DefineDir directive{};
 			directive.alias = lineLiteral[1];
 			directive.symbol = lineLiteral[2];
@@ -38,11 +46,18 @@ Assemble::ParseEvent Assemble::Rule::ALIGN::ParseLiteral(std::vector<std::string
 	if (BeginsWithHash(lineLiteral[0])) {
 		if (lineLiteral[0].substr(1, lineLiteral[0].size() - 1) == literal) {
 			pe.triggered = true;
+
+			if (lineLiteral.size() != 3) {
+				pe.severty = ParseEvent::Severty::CRITICAL;
+				pe.errorStr = fmt::format("Incorrect operands. The align-directive takes two operands: {} given.", std::to_string(lineLiteral.size() - 1));
+				return pe;
+			}
+
 			AlignDir directive{};
 			directive.sec = Util::mapSectionStr(lineLiteral[1]);
 			directive.multipleOf = std::atoi(lineLiteral[2].c_str());
 
-			if (directive.multipleOf == 0) {
+			if (directive.multipleOf <= 1) {
 				pe.severty = ParseEvent::Severty::CRITICAL;
 				pe.errorStr = "The alignment offset must be greater than one.";
 				return pe;
@@ -69,12 +84,19 @@ Assemble::ParseEvent Assemble::Rule::ORG::ParseLiteral(std::vector<std::string>&
 
 	if (lineLiteral[0] == "org") {
 		pe.triggered = true;
+
+		if (lineLiteral.size() != 3) {
+			pe.severty = ParseEvent::Severty::CRITICAL;
+			pe.errorStr = fmt::format("Incorrect operands. The org-directive takes two operands: {} given.", std::to_string(lineLiteral.size() - 1));
+			return pe;
+		}
+
 		OrganizeDir directive{};
 		directive.sec = Util::mapSectionStr(lineLiteral[1]);
 		Util::ValueReturnObject<long> vro = Util::convertToDecimal<long>(lineLiteral[2].c_str());
 		if (!vro.isValid) {
 			pe.severty = ParseEvent::Severty::CRITICAL;
-			pe.errorStr = "The given postfix indicating a number system does not match the given pattern ('q' 'h', 'o', 'b', 'd')\n";
+			pe.errorStr = "The given postfix indicating a number system does not match the given pattern ('q' 'h', 'o', 'b', 'd')";
 			return pe;
 		}
 
@@ -102,11 +124,17 @@ Assemble::ParseEvent Assemble::Rule::Section::ParseLiteral(std::vector<std::stri
 	if (lineLiteral[0] == "section") {
 		pe.triggered = true;
 
+		if (lineLiteral.size() != 2) {
+			pe.severty = ParseEvent::Severty::CRITICAL;
+			pe.errorStr = fmt::format("Incorrect operands. The section-directive takes one operand: {} given.", std::to_string(lineLiteral.size() - 1));
+			return pe;
+		}
+
 		AlignDir::Section sec = Util::mapSectionStr(lineLiteral[1]);
 
 		if (sec == AlignDir::Section::ERRORTYPE || sec == AlignDir::Section::NONE) {
-			pe.errorStr = "The given section is not valid.\n";
 			pe.severty = ParseEvent::Severty::CRITICAL;
+			pe.errorStr = "The given section is not valid.\n";
 			return pe;
 		}
 
@@ -124,9 +152,15 @@ Assemble::ParseEvent Assemble::Rule::Label::ParseLiteral(std::vector<std::string
 	if (lineLiteral[0][0] == '_' && lineLiteral[0][lineLiteral[0].size() - 1] == ':') {
 		pe.triggered = true;
 
-		std::map<std::string, void*>* targetObj = static_cast<std::map<std::string, void*>*>(branch);
+		if (lineLiteral.size() != 1) {
+			pe.severty = ParseEvent::Severty::CRITICAL;
+			pe.errorStr = fmt::format("When defining a label there should not be any other directive at that line: {} directives given.", std::to_string(lineLiteral.size() - 1));
+			return pe;
+		}
+
+		std::map<std::string, LabelPointer>* targetObj = static_cast<std::map<std::string, LabelPointer>*>(branch);
 		const std::string& substr = lineLiteral[0].substr(1, lineLiteral[0].size() - 2);
-		targetObj->emplace(substr, nullptr);
+		targetObj->insert({ substr, LabelPointer() });
 		pe.labelRef = substr;
 
 		pe.succeed = true;
@@ -141,6 +175,11 @@ Assemble::ParseEvent Assemble::Rule::DefineByte::ParseLiteral(std::vector<std::s
 
 	if (lineLiteral[0] == "db") {
 		pe.triggered = true;
+
+		if (lineLiteral.size() <= 1) {
+			pe.severty = ParseEvent::Severty::CRITICAL;
+			pe.errorStr = "You must at least define one byte of data";
+		}
 
 		std::vector<Bytestream>* targetObj = static_cast<std::vector<Bytestream>*>(branch);
 		targetObj->push_back({});
@@ -180,6 +219,12 @@ Assemble::ParseEvent Assemble::Rule::ReserveByte::ParseLiteral(std::vector<std::
 	if (lineLiteral[0] == "resb") {
 		pe.triggered = true;
 
+		if (lineLiteral.size() != 2) {
+			pe.severty = ParseEvent::Severty::CRITICAL;
+			pe.errorStr = fmt::format("Incorrect operands. The resb-directive takes one operand: {} given.", std::to_string(lineLiteral.size() - 1));
+			return pe;
+		}
+
 		std::vector<BytestreamRes>* targetObj = static_cast<std::vector<BytestreamRes>*>(branch);
 		targetObj->push_back({});
 
@@ -215,7 +260,7 @@ Assemble::ParseEvent Assemble::Rule::InstructionDir::ParseLiteral(std::vector<st
 
 		if (info.getWordCount() != lineLiteral.size()) {
 			pe.severty = ParseEvent::Severty::CRITICAL;
-			pe.errorStr = std::string_view("The given operands for instruction " + lineLiteral[0] + " are invalid! Please check the documentation.\n");
+			pe.errorStr = fmt::format("The given operands for instruction {} are invalid! Please check the documentation.\n", lineLiteral[0]);
 			return pe;
 		}
 

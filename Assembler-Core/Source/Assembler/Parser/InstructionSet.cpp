@@ -8,7 +8,7 @@ Assemble::InstructionInformation Assemble::getInstructionData(std::string& instr
 		std::transform(instrStr.begin(), instrStr.end(), instrStr.begin(), ::tolower);
 		instruction = &instructions.at(instrStr);
 	}
-	catch (const std::out_of_range& e) {
+	catch (...) {
 		InstructionInformation inf{};
 		inf.isValid = false;
 		return inf;

@@ -12,11 +12,8 @@ _cool:
 	
 section .bss
 _data:
-	resb 05h
-	
-	
-	
-	
+	resb 00h
+			
 section .text
 	add
 	subb

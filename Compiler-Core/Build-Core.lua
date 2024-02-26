@@ -1,4 +1,4 @@
-project "ParserCore"
+project "CompilerCore"
    kind "StaticLib"
    language "C++"
    cppdialect "C++20"

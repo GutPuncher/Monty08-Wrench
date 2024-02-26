@@ -1,6 +1,5 @@
 #include "Assembler/AssembleComp.h"
-#include "Preprocessor/PreprocessComp.h"
-#include "Parser/ParseComp.h"
+#include "Compiler/CompileComp.h"
 
 int main(int argc, char** argv) {
 	Assemble::Assemble();

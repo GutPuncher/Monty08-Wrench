@@ -46,8 +46,8 @@ namespace Assemble {
 
 		bool triggered = false;
 		bool succeed = false;
-		std::string_view errorStatus;
-		std::string_view errorStr;
+		std::string errorStatus;
+		std::string errorStr;
 		Severty severty;
 		AlignDir::Section sectionInit = AlignDir::Section::NONE;
 
