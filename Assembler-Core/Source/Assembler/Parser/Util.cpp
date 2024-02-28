@@ -29,7 +29,7 @@ std::string Assemble::Util::mapStrSection(AlignDir::Section section)
 {
 	switch (section) {
 	case AlignDir::Section::BSS: return ".bss";
-	case AlignDir::Section::DATA: return ".bss";
+	case AlignDir::Section::DATA: return ".data";
 	case AlignDir::Section::ERRORTYPE: return "errortype";
 	case AlignDir::Section::GLOBAL: return "global";
 	case AlignDir::Section::TEXT: return ".text";

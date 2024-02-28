@@ -27,7 +27,6 @@ bool Assemble::Parser::LoadFromFile(const std::string path)
 {
 	m_Path = path;
 	m_Source = std::ifstream(path);
-	m_SourcePreprocess = std::ifstream(path);
 
 	std::cout << "Loading file for parsing: " + path + '\n';
 
@@ -52,9 +51,8 @@ bool Assemble::Parser::Parse(bool preprocess)
 	size_t lineCount = 0;
 	std::string line;
 	auto& ruleset = preprocess ? m_RulePreprocessRegistry : m_RuleRegistry;
-	std::ifstream& stream = preprocess ? m_SourcePreprocess : m_Source;
 
-	while (std::getline(stream, line, '\n')) {
+	while (std::getline(m_Source, line, '\n')) {
 		lineCount++;
 		std::istringstream lineStream(line);
 		std::string terminal;
@@ -133,7 +131,10 @@ bool Assemble::Parser::Parse(bool preprocess)
 		}
 	}
 
-	fmt::print(fg(fmt::color::green), "=> Successfully parsed file {0} for Configuration: Preprocessor run: {1}", m_Path, (preprocess ? "true\n\n" : "false\n\n"));
+	fmt::print(fg(fmt::color::green), "=> Successfully parsed file {0} for Configuration: [Preprocessor={1}]\n\n", m_Path, (preprocess ? "true" : "false"));
+	m_Source.clear();
+	m_Source.seekg(0);
+
 	return true;
 }
 

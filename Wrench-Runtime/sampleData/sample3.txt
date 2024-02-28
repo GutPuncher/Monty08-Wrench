@@ -1,25 +1,24 @@
 #align .text 8
 #define aa bb
-org .bss 10
+org .text 0
 
 section .data
 _test:
-	db "string"
+	db 10d 7o 9
 _cool:
 	db "hallo"
 	
 	
-	
 section .bss
 _data:
-	resb 00h
+	resb 10h
 			
 section .text
 	add
-	subb
 	jmp [end]
+	subb
 	jmpe 1 [end]
-	moda r0 01h
 	
 _end:
 	end
+	

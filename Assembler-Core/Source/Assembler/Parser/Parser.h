@@ -17,6 +17,8 @@ namespace Assemble {
 		bool LoadFromFile(const std::string path);
 		bool Parse(bool preprocess = false);
 
+		inline ParseTree* getTree() { return &m_Tree; }
+
 	private:
 		void SetupRules();
 		inline bool MatchRuleSection(const std::vector<AlignDir::Section>& sections) const;
@@ -26,7 +28,6 @@ namespace Assemble {
 
 		std::string m_Path;
 		std::ifstream m_Source;
-		std::ifstream m_SourcePreprocess;
 
 		AlignDir::Section m_InSection = AlignDir::Section::NONE;
 		std::string m_LabelRefKey;

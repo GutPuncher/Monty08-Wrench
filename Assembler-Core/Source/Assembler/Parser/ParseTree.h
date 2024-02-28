@@ -146,17 +146,15 @@ namespace Assemble {
 		DataType type;
 	};
 
-	namespace {
-		struct ParseTree {
-			std::vector<AlignDir> preproc_align;
-			std::vector<DefineDir> preproc_define;
-			std::vector<OrganizeDir> organizes;
+	struct ParseTree {
+		std::vector<AlignDir> preproc_align;
+		std::vector<DefineDir> preproc_define;
+		std::vector<OrganizeDir> organizes;
 
-			SectionBSS sec_bss;
-			SectionData sec_data;
-			SectionText sec_text;
+		SectionBSS sec_bss;
+		SectionData sec_data;
+		SectionText sec_text;
 
-			std::map<std::string, LabelPointer> labels;
-		};
-	}
+		std::map<std::string, LabelPointer> labels;
+	};
 }

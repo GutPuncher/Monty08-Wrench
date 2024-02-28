@@ -1,4 +1,4 @@
-#include "AssembleComp.h"
+#include "Component.h"
 
 #include <iostream>
 

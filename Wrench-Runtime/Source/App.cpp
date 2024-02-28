@@ -1,8 +1,8 @@
-#include "Assembler/AssembleComp.h"
+#include "Assembler/Component.h"
 #include "Compiler/CompileComp.h"
 
 int main(int argc, char** argv) {
-	Assemble::Assemble();
+	Assemble::Assemble("sampleData/sample3.txt");
 
 	return 0;
 }

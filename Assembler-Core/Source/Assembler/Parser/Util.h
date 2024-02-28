@@ -30,36 +30,43 @@ namespace Assemble::Util {
 		char postfix = std::tolower(numberStr[numberStr.size() - 1]);
 		ValueReturnObject<T> vro{ true, 0 };
 
+#ifdef sym // Not suitable for number systems containing letters, obsolete
 		for (int i = 0; i < numberStr.size() - 1; i++) {
 			if (std::isdigit(numberStr[i]) == 0) {
 				vro.isValid = false;
 				return vro;
 			}
 		}
+#endif
 
-		if (std::isdigit(postfix) > 0) {
-			vro.value = static_cast<T>(std::atoll(numberStr.c_str()));
-		}
-		else if (postfix == 'd') {
-			vro.value = static_cast<T>(std::atoll(numberStr.substr(0, numberStr.size() - 1).c_str()));
-		}
-		else {
-			switch (postfix) {
-			case 'b':
-				vro.value = static_cast<T>(std::stoll(numberStr.c_str(), nullptr, 2));
-				break;
-			case 'h':
-				vro.value = static_cast<T>(std::stoll(numberStr.c_str(), nullptr, 16));
-				break;
-			case 'o':
-				vro.value = static_cast<T>(std::stoll(numberStr.c_str(), nullptr, 8));
-				break;
-			case 'q':
-				vro.value = static_cast<T>(std::stoll(numberStr.c_str(), nullptr, 4));
-				break;
-			default:
-				vro.isValid = false;
+		try {
+			if (std::isdigit(postfix) > 0) {
+				vro.value = static_cast<T>(std::atoll(numberStr.c_str()));
 			}
+			else if (postfix == 'd') {
+				vro.value = static_cast<T>(std::atoll(numberStr.substr(0, numberStr.size() - 1).c_str()));
+			}
+			else {
+				switch (postfix) {
+				case 'b':
+					vro.value = static_cast<T>(std::stoll(numberStr.c_str(), nullptr, 2));
+					break;
+				case 'h':
+					vro.value = static_cast<T>(std::stoll(numberStr.c_str(), nullptr, 16));
+					break;
+				case 'o':
+					vro.value = static_cast<T>(std::stoll(numberStr.c_str(), nullptr, 8));
+					break;
+				case 'q':
+					vro.value = static_cast<T>(std::stoll(numberStr.c_str(), nullptr, 4));
+					break;
+				default:
+					vro.isValid = false;
+				}
+			}
+		}
+		catch (std::invalid_argument) {
+			vro.isValid = false;
 		}
 
 		return vro;
