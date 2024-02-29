@@ -33,7 +33,7 @@ namespace Assemble {
 	};
 
 	struct Bytestream {
-		std::vector<unsigned char> bytestream;
+		std::vector<char> bytestream;
 		size_t lenght;
 	};
 

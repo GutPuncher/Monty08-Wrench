@@ -3,7 +3,10 @@
 #include <fmt/format.h>
 #include <fmt/color.h>
 
-bool Assemble::Assembler::AssembleFromTree(const ParseTree* tree)
+#include <iterator>
+#include <algorithm>
+
+bool Assemble::Assembler::AssembleFromTree(const ParseTree* tree, const std::string& outFile)
 {
 	fmt::print("Assembling objects.\n----------------------------------------------\n");
 
@@ -13,21 +16,24 @@ bool Assemble::Assembler::AssembleFromTree(const ParseTree* tree)
 		AlignDir::Section::TEXT,
 		m_MaxProgSize,
 		0,
-		true
+		true,
+		generateText
 	};
 
 	SectionInfo bss{
 		AlignDir::Section::BSS,
 		GetBssSize(tree),
 		m_MaxProgAdr - GetBssSize(tree),
-		tree->sec_bss.dataRes.size() != 0
+		tree->sec_bss.dataRes.size() != 0,
+		generateBss
 	};
 
 	SectionInfo data{
 		AlignDir::Section::DATA,
 		GetDataSize(tree),
 		m_MaxProgAdr - GetDataSize(tree) - bss.size,
-		tree->sec_data.data.size() != 0
+		tree->sec_data.data.size() != 0,
+		generateData
 	};
 
 	for (auto organizer : organizers) {
@@ -45,6 +51,7 @@ bool Assemble::Assembler::AssembleFromTree(const ParseTree* tree)
 	}
 
 	std::vector<SectionInfo> sects{ text, bss, data };
+	std::sort(sects.begin(), sects.end());
 
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
@@ -60,10 +67,26 @@ bool Assemble::Assembler::AssembleFromTree(const ParseTree* tree)
 		}
 	}
 
+	m_ExecutableHandle = std::ofstream(outFile, std::ios::binary);
+	if (!m_ExecutableHandle.is_open()) {
+		fmt::print(fg(fmt::color::crimson), "Cannot open file {}\n", outFile);
+		return false;
+	}
+
+	int lastEnd = 0;
+	for (int i = 0; i < 3; i++) {
+		int offset = sects[i].offset;
+		std::fill_n(std::ostreambuf_iterator<char>(m_ExecutableHandle), offset - lastEnd, static_cast<char>(0x3F));
+		sects[i].generate(tree, m_ExecutableHandle);
+		lastEnd = offset + sects[i].size;
+	}
+
+	m_ExecutableHandle.close();
+
 	return true;
 }
 
-size_t Assemble::Assembler::GetBssSize(const ParseTree* tree) const
+size_t Assemble::Assembler::GetBssSize(const ParseTree* tree)
 {
 	auto data = tree->sec_bss;
 	size_t size = 0;
@@ -75,7 +98,7 @@ size_t Assemble::Assembler::GetBssSize(const ParseTree* tree) const
 	return size;
 }
 
-size_t Assemble::Assembler::GetDataSize(const ParseTree* tree) const
+size_t Assemble::Assembler::GetDataSize(const ParseTree* tree)
 {
 	auto data = tree->sec_data;
 	size_t size = 0;
@@ -108,4 +131,24 @@ int Assemble::Assembler::CalcIntersectionLenght(int start0, int start1, int end0
 	}
 
 	return -1;
+}
+
+bool Assemble::Assembler::generateText(const ParseTree* tree, std::ofstream& stream)
+{
+	std::fill_n(std::ostreambuf_iterator<char>(stream), 0x20, 'T');
+	return false;
+}
+
+bool Assemble::Assembler::generateBss(const ParseTree* tree, std::ofstream& stream)
+{
+	std::fill_n(std::ostreambuf_iterator<char>(stream), GetBssSize(tree), '0');
+	return false;
+}
+
+bool Assemble::Assembler::generateData(const ParseTree* tree, std::ofstream& stream)
+{
+	for (Bytestream bs : tree->sec_data.data) {
+		stream.write(bs.bytestream.data(), bs.lenght);
+	}
+	return false;
 }

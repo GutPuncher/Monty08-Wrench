@@ -1,12 +1,15 @@
 #align .text 8
 #define aa bb
 org .text 0
+org .data 80h
 
 section .data
 _test:
 	db 10d 7o 9
 _cool:
 	db "hallo"
+_string:
+	db "this_is_another_string_that_cannot_contain_any_whitespaces"
 	
 	
 section .bss
