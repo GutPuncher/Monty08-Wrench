@@ -1,27 +1,22 @@
 #align .text 8
 #define aa bb
-org .text 0
-org .data 80h
 
 section .data
-_test:
-	db 10d 7o 9
-_cool:
-	db "hallo"
 _string:
-	db "this_is_another_string_that_cannot_contain_any_whitespaces"
-	
+	db "this_is_another_string"
 	
 section .bss
 _data:
 	resb 10h
 			
 section .text
-	add
-	jmp [end]
-	subb
-	jmpe 1 [end]
+	ldav 5
+	zero
+	xchop
 	
-_end:
+_loop:
+	inc
+	jmpne [loop]
+	
 	end
-	
+	nop

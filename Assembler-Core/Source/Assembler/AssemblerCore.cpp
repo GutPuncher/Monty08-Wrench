@@ -61,6 +61,7 @@ bool Assemble::Assembler::AssembleFromTree(const ParseTree* tree, const std::str
 				if (int overlapLength = CalcIntersectionLenght(sects[i].offset, sects[j].offset, sects[i].offset + sects[i].size, sects[j].offset + sects[j].size);
 					overlapLength != -1) {
 					fmt::print(fg(fmt::color::crimson), "[Error]: Section {0} colliding with section {1}. Sections overlaping by {2} bytes. Fragmentation is not supported as now.\n", MapIndexToSection(i), MapIndexToSection(j), overlapLength);
+					CloseHandle(m_ExecutableHandle);
 					return false;
 				}
 			}
@@ -70,20 +71,36 @@ bool Assemble::Assembler::AssembleFromTree(const ParseTree* tree, const std::str
 	m_ExecutableHandle = std::ofstream(outFile, std::ios::binary);
 	if (!m_ExecutableHandle.is_open()) {
 		fmt::print(fg(fmt::color::crimson), "Cannot open file {}\n", outFile);
+		CloseHandle(m_ExecutableHandle);
 		return false;
 	}
 
 	int lastEnd = 0;
 	for (int i = 0; i < 3; i++) {
 		int offset = sects[i].offset;
-		std::fill_n(std::ostreambuf_iterator<char>(m_ExecutableHandle), offset - lastEnd, static_cast<char>(0x3F));
-		sects[i].generate(tree, m_ExecutableHandle);
+		int interval = offset - lastEnd;
+		std::fill_n(std::ostreambuf_iterator<char>(m_ExecutableHandle), interval, static_cast<char>(0x3F));
+
+		m_BufferPtr += (size_t)interval;
+
+		if (!sects[i].generate(tree, m_ExecutableHandle, m_BufferPtr, m_LabelIndex, m_LabelReg)) {
+			CloseHandle(m_ExecutableHandle);
+			return false;
+		}
+
 		lastEnd = offset + sects[i].size;
 	}
 
-	m_ExecutableHandle.close();
+	CloseHandle(m_ExecutableHandle);
 
 	return true;
+}
+
+inline void Assemble::Assembler::CloseHandle(std::ofstream& handle)
+{
+	if (handle) {
+		handle.close();
+	}
 }
 
 size_t Assemble::Assembler::GetBssSize(const ParseTree* tree)
@@ -133,22 +150,161 @@ int Assemble::Assembler::CalcIntersectionLenght(int start0, int start1, int end0
 	return -1;
 }
 
-bool Assemble::Assembler::generateText(const ParseTree* tree, std::ofstream& stream)
+bool Assemble::Assembler::generateText(const ParseTree* tree, std::ofstream& stream, size_t& bufPtr, index& ind, registry& reg)
 {
-	std::fill_n(std::ostreambuf_iterator<char>(stream), 0x20, 'T');
-	return false;
+	for (Instruction instr : tree->sec_text.code) {
+		char opbyte = instr.opcode;
+
+		if (instr.label) {
+			ind.insert({ *instr.label, bufPtr });
+		}
+
+		if (instr.param0.second) {
+			char val = matchParamValToBin(instr.param0.second, instr.param0.first, 6);
+			if (val == -1) return false;
+			opbyte |= val;
+			bufPtr++;
+		}
+
+		if (instr.param1.second) {
+			char val = matchParamValToBin(instr.param1.second, instr.param1.first, 7);
+			if (val == -1) return false;
+			opbyte |= val;
+			bufPtr++;
+		}
+
+		stream << opbyte;
+
+		if (instr.op0.second) {
+			BinaryOperand binOp = matchOpValToBin(instr.op0.second, instr.op0.first, reg, bufPtr);
+			if (!binOp) return false;
+			stream << binOp.binaries.first;
+			bufPtr++;
+			if (binOp.wide) {
+				stream << binOp.binaries.second;
+				bufPtr++;
+			}
+		}
+
+		if (instr.op1.second) {
+			BinaryOperand binOp = matchOpValToBin(instr.op1.second, instr.op1.first, reg, bufPtr);
+			if (!binOp) return false;
+			stream << binOp.binaries.first;
+			bufPtr++;
+			if (binOp.wide) {
+				stream << binOp.binaries.second;
+				bufPtr++;
+			}
+		}
+	}
+
+	return true;
 }
 
-bool Assemble::Assembler::generateBss(const ParseTree* tree, std::ofstream& stream)
+bool Assemble::Assembler::generateBss(const ParseTree* tree, std::ofstream& stream, size_t& bufPtr, index& ind, registry& reg)
 {
-	std::fill_n(std::ostreambuf_iterator<char>(stream), GetBssSize(tree), '0');
-	return false;
+	for (Assemble::BytestreamRes st : tree->sec_bss.dataRes) {
+		std::fill_n(std::ostreambuf_iterator<char>(stream), (int)st.lenght, '0');
+		if (st.label) {
+			ind.insert({ *st.label, bufPtr });
+		}
+
+		bufPtr += st.lenght;
+	}
+
+	return true;
 }
 
-bool Assemble::Assembler::generateData(const ParseTree* tree, std::ofstream& stream)
+bool Assemble::Assembler::generateData(const ParseTree* tree, std::ofstream& stream, size_t& bufPtr, index& ind, registry& reg)
 {
 	for (Bytestream bs : tree->sec_data.data) {
 		stream.write(bs.bytestream.data(), bs.lenght);
+		if (bs.label) {
+			ind.insert({ *bs.label, bufPtr });
+		}
+
+		bufPtr += bs.lenght;
+	}
+
+	return true;
+}
+
+char Assemble::Assembler::matchParamValToBin(Operand* op, Operand::Type type, char index)
+{
+	char out = 0;
+
+	switch (type) {
+	case Operand::Type::PORT:
+		out = (char)static_cast<Op_Port*>(op)->p;
+		break;
+	case Operand::Type::REGISTER:
+		out = (char)static_cast<Op_Register*>(op)->reg;
+		break;
+	case Operand::Type::SYSTEM_CONSTANT:
+		out = static_cast<Op_SystemConstant*>(op)->value;
+		break;
+	case Operand::Type::NUMERIC:
+		out = (char)static_cast<Op_Numeric*>(op)->value;
+		break;
+	default:
+		return -1;
+	}
+
+	return out << index;
+}
+
+Assemble::Assembler::BinaryOperand Assemble::Assembler::matchOpValToBin(Operand* op, Operand::Type type, registry& registry, size_t bufPtr)
+{
+	BinaryOperand bin{ true };
+
+	switch (type) {
+	case Operand::Type::LABEL: {
+		Op_Label lab = *static_cast<Op_Label*>(op);
+		registry.push_back({ bufPtr, lab.label });
+		bin.wide = true;
+		break;
+	}
+	case Operand::Type::NUMERIC: {
+		Op_Numeric num = *static_cast<Op_Numeric*>(op);
+		bin.binaries.first = num.value;
+		break;
+	}
+	case Operand::Type::NUMERIC_WIDE: {
+		Op_NumericWide numW = *static_cast<Op_NumericWide*>(op);
+		bin.binaries.first = (char)(numW.value >> 8);
+		bin.binaries.second = (char)((numW.value & 0x00FF) >> 8);
+		bin.wide = true;
+		break;
+	}
+	default:
+		bin.isValid = false;
+		return bin;
+	}
+
+	return bin;
+}
+
+bool Assemble::Assembler::MatchLabels()
+{
+	std::streampos adr;
+	for (auto gap : m_LabelReg) {
+		adr = gap.first;
+		m_ExecutableHandle.seekp(adr);
+
+		auto iter = m_LabelIndex.find(gap.second);
+		if (iter != m_LabelIndex.end()) {
+			size_t pos = m_LabelIndex.at(gap.second); // TODO: Optimize, use iterator to access adr
+			const char lower = (char)((pos & 0x00FF) >> 8);
+			m_ExecutableHandle.write(&lower, 1);
+
+			adr += 1;
+			const char higher = (char)(pos >> 8);
+			m_ExecutableHandle.write(&higher, 1);
+		}
+		else {
+			fmt::print(fg(fmt::color::crimson), "[Error]: The given symbol {0} could not resolved.\n", gap.second);
+			return false;
+		}
 	}
 	return false;
 }

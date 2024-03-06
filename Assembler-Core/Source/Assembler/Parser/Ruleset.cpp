@@ -33,6 +33,7 @@ Assemble::ParseEvent Assemble::Rule::DEFINE::ParseLiteral(std::vector<std::strin
 			targetObj->push_back(directive);
 
 			pe.succeed = true;
+			pe.labelRefObj = this;
 		}
 	}
 
@@ -72,6 +73,7 @@ Assemble::ParseEvent Assemble::Rule::ALIGN::ParseLiteral(std::vector<std::string
 			targetObj->push_back(directive);
 
 			pe.succeed = true;
+			pe.labelRefObj = this;
 		}
 	}
 
@@ -265,6 +267,8 @@ Assemble::ParseEvent Assemble::Rule::InstructionDir::ParseLiteral(std::vector<st
 		}
 
 		auto field = info.operandBitfield;
+		auto addfield = info.addField;
+
 		if (field & 0b0010'0000) {
 			if (field & 0b0100'0000) {
 				instr.param0 = { Operand::Type::SYSTEM_CONSTANT, new Op_SystemConstant(field & 0b0001'0000) };
@@ -274,13 +278,16 @@ Assemble::ParseEvent Assemble::Rule::InstructionDir::ParseLiteral(std::vector<st
 			}
 		}
 
+		if (addfield & 0b0000'0001) {
+			instr.param0 = { Operand::Type::SYSTEM_CONSTANT, new Op_SystemConstant(true) };
+		}
+
 		bool isComplex = field & 0b1000'0000;
 		unsigned char operandFetch = isComplex ? 3 : 4;
 
-		unsigned char possibles[4] = { 0b0000'1000 , 0b0000'0100 , 0b0000'0010 , 0b0000'0001 };
 		unsigned char opCount = 1;
 		for (int i = 0; i < operandFetch; i++) {
-			if (field & possibles[i]) {
+			if (field & 0b0000'1000 >> i) {
 				auto paramResponse = Util::dispatchOperand(lineLiteral[opCount++]);
 
 				switch (i) {
@@ -303,7 +310,7 @@ Assemble::ParseEvent Assemble::Rule::InstructionDir::ParseLiteral(std::vector<st
 		std::vector<Instruction>* targetObj = static_cast<std::vector<Instruction>*>(branch);
 		targetObj->push_back(instr);
 
-		pe.labelRefObj = &targetObj[targetObj->size() - 1];
+		pe.labelRefObj = &(*targetObj)[targetObj->size() - 1];
 		pe.ptrType = LabelPointer::DataType::INSTRUCTION;
 		pe.succeed = true;
 	}

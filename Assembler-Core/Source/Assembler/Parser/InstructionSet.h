@@ -16,6 +16,8 @@ namespace Assemble {
 
 		bool isValid = true;
 
+		unsigned char addField;
+
 		size_t getWordCount() const {
 			size_t count = 1;
 			for (int i = 0; i < 4; ++i) {

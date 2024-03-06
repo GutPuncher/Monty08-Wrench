@@ -4,11 +4,11 @@ Assemble::InstructionInformation Assemble::getInstructionData(std::string& instr
 {
 	InstructionInformation* instruction = nullptr;
 
-	try {
-		std::transform(instrStr.begin(), instrStr.end(), instrStr.begin(), ::tolower);
-		instruction = &instructions.at(instrStr);
+	auto iter = instructions.find(instrStr);
+	if (iter != instructions.end()) {
+		instruction = &iter->second;
 	}
-	catch (...) {
+	else {
 		InstructionInformation inf{};
 		inf.isValid = false;
 		return inf;
@@ -60,11 +60,16 @@ void Assemble::SetupInstructionData()
 	instructions["stoahpi"] = { 0x25, 0b0000'1000, 4 };
 	instructions["storhpi"] = { 0x26, 0b0000'1100, 4 };
 
-	// Branching and Conditional;
+	// Branching and Conditional
 	instructions["jmp"] = { 0x27, 0b1000'0011, 3 };
-	instructions["jmpc"] = { 0x28, 0b1111'1011, 3 };
-	instructions["jmpz"] = { 0x29, 0b1111'1011, 3 };
-	instructions["jmpe"] = { 0x2A, 0b1111'1011, 3 };
+	instructions["jmpc"] = { 0x28, 0b1111'0011, 3 };
+	instructions["jmpz"] = { 0x29, 0b1111'0011, 3 };
+	instructions["jmpe"] = { 0x2A, 0b1111'0011, 3 };
+
+	// --> Virtual Instructions
+	instructions["jmpnc"] = { 0x28, 0b1111'0011, 3, 0b0000'0001 };
+	instructions["jmpnz"] = { 0x29, 0b1111'0011, 3, 0b0000'0001 };
+	instructions["jmpne"] = { 0x2A, 0b1111'0011, 3, 0b0000'0001 };
 
 	// I/O
 	instructions["portwrt"] = { 0x2C, 0b0000'1000, 2 };

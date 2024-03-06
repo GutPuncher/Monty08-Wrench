@@ -33,11 +33,15 @@ namespace Assemble {
 	};
 
 	struct Bytestream {
+		std::string* label = nullptr;
+
 		std::vector<char> bytestream;
 		size_t lenght;
 	};
 
 	struct BytestreamRes {
+		std::string* label = nullptr;
+
 		size_t lenght;
 	};
 
@@ -54,7 +58,7 @@ namespace Assemble {
 	struct Op_NumericWide : public Operand {
 		Op_NumericWide(int val) : value(val) {}
 
-		int value;
+		short value;
 	};
 
 	struct Op_Label : public Operand {
@@ -109,6 +113,8 @@ namespace Assemble {
 	};
 
 	struct Instruction {
+		std::string* label = nullptr;
+
 		unsigned char opcode;
 		std::pair<Operand::Type, Operand*> param0 = { Operand::Type::NONE, nullptr };
 		std::pair<Operand::Type, Operand*> param1 = { Operand::Type::NONE, nullptr };

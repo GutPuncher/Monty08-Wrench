@@ -21,6 +21,7 @@ Assemble::Parser::~Parser()
 {
 	m_RulePreprocessRegistry.clear();
 	m_RuleRegistry.clear();
+	if (m_Source) m_Source.close();
 }
 
 bool Assemble::Parser::LoadFromFile(const std::string path)
@@ -55,13 +56,14 @@ bool Assemble::Parser::Parse(bool preprocess)
 	while (std::getline(m_Source, line, '\n')) {
 		lineCount++;
 		std::istringstream lineStream(line);
-		std::string terminal;
 
 		transform(line.begin(), line.end(), line.begin(), ::tolower);
-		std::vector<std::string> words{ 5 };
+		std::vector<std::string> words;
+		words.reserve(5);
+
 		Util::split(Util::trim(std::string(line)), words, ' ');
 
-		if (line.size() == 0 || words.size() == 0) continue;
+		if (line.size() < 3 || words.size() == 0 || line.find("\r") != std::string::npos) continue;
 
 		bool unknownID = true;
 		for (SyntaxRule* rule : ruleset) {
@@ -82,7 +84,19 @@ bool Assemble::Parser::Parse(bool preprocess)
 					return false;
 				}
 
-				if (m_ToBeLabeled) {
+				if (m_ToBeLabeled && ev.labelRef.size() == 0) {
+					switch (ev.ptrType) {
+					case LabelPointer::DataType::DEFINE_BYTE:
+						static_cast<Bytestream*>(ev.labelRefObj)->label = &m_LabelRefKey;
+						break;
+					case LabelPointer::DataType::INSTRUCTION:
+						static_cast<Instruction*>(ev.labelRefObj)->label = &m_LabelRefKey;
+						break;
+					case LabelPointer::DataType::RESERVE_BYTE:
+						static_cast<BytestreamRes*>(ev.labelRefObj)->label = &m_LabelRefKey;
+						break;
+					}
+
 					m_Tree.labels[m_LabelRefKey].ptr = ev.labelRefObj;
 					m_Tree.labels[m_LabelRefKey].type = ev.ptrType;
 					m_ToBeLabeled = false;
