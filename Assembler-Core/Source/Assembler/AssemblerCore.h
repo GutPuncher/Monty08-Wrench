@@ -51,7 +51,7 @@ namespace Assemble {
 		size_t m_MaxProgAdr = 0x0100;
 		size_t m_MaxProgSize = 0x0020;
 
-		size_t m_BufferPtr;
+		size_t m_BufferPtr = 0;
 
 		std::ofstream m_ExecutableHandle;
 

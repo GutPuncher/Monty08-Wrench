@@ -279,7 +279,7 @@ Assemble::ParseEvent Assemble::Rule::InstructionDir::ParseLiteral(std::vector<st
 		}
 
 		if (addfield & 0b0000'0001) {
-			instr.param0 = { Operand::Type::SYSTEM_CONSTANT, new Op_SystemConstant(true) };
+			instr.param1 = { Operand::Type::SYSTEM_CONSTANT, new Op_SystemConstant(true) };
 		}
 
 		bool isComplex = field & 0b1000'0000;

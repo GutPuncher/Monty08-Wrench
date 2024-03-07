@@ -16,7 +16,8 @@ section .text
 	
 _loop:
 	inc
-	jmpne [loop]
+	jmpne [string]
 	
 	end
 	nop
+	

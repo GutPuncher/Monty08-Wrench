@@ -14,9 +14,9 @@ namespace Assemble {
 
 		unsigned char cylces;
 
-		bool isValid = true;
-
 		unsigned char addField;
+
+		bool isValid = true;
 
 		size_t getWordCount() const {
 			size_t count = 1;

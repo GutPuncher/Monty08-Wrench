@@ -91,6 +91,10 @@ bool Assemble::Assembler::AssembleFromTree(const ParseTree* tree, const std::str
 		lastEnd = offset + sects[i].size;
 	}
 
+	if (!MatchLabels()) {
+		return false;
+	}
+
 	CloseHandle(m_ExecutableHandle);
 
 	return true;
@@ -155,24 +159,23 @@ bool Assemble::Assembler::generateText(const ParseTree* tree, std::ofstream& str
 	for (Instruction instr : tree->sec_text.code) {
 		char opbyte = instr.opcode;
 
-		if (instr.label) {
-			ind.insert({ *instr.label, bufPtr });
+		if (instr.label.size()) {
+			ind.insert({ instr.label, bufPtr });
 		}
 
 		if (instr.param0.second) {
 			char val = matchParamValToBin(instr.param0.second, instr.param0.first, 6);
 			if (val == -1) return false;
 			opbyte |= val;
-			bufPtr++;
 		}
 
 		if (instr.param1.second) {
 			char val = matchParamValToBin(instr.param1.second, instr.param1.first, 7);
 			if (val == -1) return false;
 			opbyte |= val;
-			bufPtr++;
 		}
 
+		bufPtr++;
 		stream << opbyte;
 
 		if (instr.op0.second) {
@@ -205,8 +208,8 @@ bool Assemble::Assembler::generateBss(const ParseTree* tree, std::ofstream& stre
 {
 	for (Assemble::BytestreamRes st : tree->sec_bss.dataRes) {
 		std::fill_n(std::ostreambuf_iterator<char>(stream), (int)st.lenght, '0');
-		if (st.label) {
-			ind.insert({ *st.label, bufPtr });
+		if (st.label.size()) {
+			ind.insert({ st.label, bufPtr });
 		}
 
 		bufPtr += st.lenght;
@@ -219,8 +222,8 @@ bool Assemble::Assembler::generateData(const ParseTree* tree, std::ofstream& str
 {
 	for (Bytestream bs : tree->sec_data.data) {
 		stream.write(bs.bytestream.data(), bs.lenght);
-		if (bs.label) {
-			ind.insert({ *bs.label, bufPtr });
+		if (bs.label.size()) {
+			ind.insert({ bs.label, bufPtr });
 		}
 
 		bufPtr += bs.lenght;
@@ -294,17 +297,22 @@ bool Assemble::Assembler::MatchLabels()
 		auto iter = m_LabelIndex.find(gap.second);
 		if (iter != m_LabelIndex.end()) {
 			size_t pos = m_LabelIndex.at(gap.second); // TODO: Optimize, use iterator to access adr
-			const char lower = (char)((pos & 0x00FF) >> 8);
+			const char lower = (char)(pos - 1 & 0x00FF);
 			m_ExecutableHandle.write(&lower, 1);
 
 			adr += 1;
 			const char higher = (char)(pos >> 8);
 			m_ExecutableHandle.write(&higher, 1);
+
+			if (lower == 0 && higher == 0) {
+				fmt::print(fg(fmt::color::crimson), "[Error]: A jump to address 0 (label \"{}\") is not supported. To fix this error insert a 'nop' at the start of your program or move the affected section.\n", gap.second);
+				return false;
+			}
 		}
 		else {
 			fmt::print(fg(fmt::color::crimson), "[Error]: The given symbol {0} could not resolved.\n", gap.second);
 			return false;
 		}
 	}
-	return false;
+	return true;
 }

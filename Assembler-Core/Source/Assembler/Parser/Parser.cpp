@@ -87,13 +87,13 @@ bool Assemble::Parser::Parse(bool preprocess)
 				if (m_ToBeLabeled && ev.labelRef.size() == 0) {
 					switch (ev.ptrType) {
 					case LabelPointer::DataType::DEFINE_BYTE:
-						static_cast<Bytestream*>(ev.labelRefObj)->label = &m_LabelRefKey;
+						static_cast<Bytestream*>(ev.labelRefObj)->label = m_LabelRefKey;
 						break;
 					case LabelPointer::DataType::INSTRUCTION:
-						static_cast<Instruction*>(ev.labelRefObj)->label = &m_LabelRefKey;
+						static_cast<Instruction*>(ev.labelRefObj)->label = m_LabelRefKey;
 						break;
 					case LabelPointer::DataType::RESERVE_BYTE:
-						static_cast<BytestreamRes*>(ev.labelRefObj)->label = &m_LabelRefKey;
+						static_cast<BytestreamRes*>(ev.labelRefObj)->label = m_LabelRefKey;
 						break;
 					}
 

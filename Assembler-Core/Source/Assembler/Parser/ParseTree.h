@@ -33,14 +33,14 @@ namespace Assemble {
 	};
 
 	struct Bytestream {
-		std::string* label = nullptr;
+		std::string label;
 
 		std::vector<char> bytestream;
 		size_t lenght;
 	};
 
 	struct BytestreamRes {
-		std::string* label = nullptr;
+		std::string label;
 
 		size_t lenght;
 	};
@@ -113,7 +113,7 @@ namespace Assemble {
 	};
 
 	struct Instruction {
-		std::string* label = nullptr;
+		std::string label;
 
 		unsigned char opcode;
 		std::pair<Operand::Type, Operand*> param0 = { Operand::Type::NONE, nullptr };
