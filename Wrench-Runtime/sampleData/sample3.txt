@@ -1,9 +1,11 @@
 #align .text 8
-#define aa bb
+#define register0 r0
+
+org .text 8
 
 section .data
 _string:
-	db "this_is_another_string"
+	db "this_is_a_string"
 	
 section .bss
 _data:

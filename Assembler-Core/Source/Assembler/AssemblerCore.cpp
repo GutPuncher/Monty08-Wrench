@@ -23,7 +23,7 @@ bool Assemble::Assembler::AssembleFromTree(const ParseTree* tree, const std::str
 	SectionInfo bss{
 		AlignDir::Section::BSS,
 		GetBssSize(tree),
-		m_MaxProgAdr - GetBssSize(tree),
+		(int)(m_MaxProgAdr - GetBssSize(tree)),
 		tree->sec_bss.dataRes.size() != 0,
 		generateBss
 	};
@@ -31,7 +31,7 @@ bool Assemble::Assembler::AssembleFromTree(const ParseTree* tree, const std::str
 	SectionInfo data{
 		AlignDir::Section::DATA,
 		GetDataSize(tree),
-		m_MaxProgAdr - GetDataSize(tree) - bss.size,
+		(int)(m_MaxProgAdr - GetDataSize(tree) - bss.size),
 		tree->sec_data.data.size() != 0,
 		generateData
 	};
@@ -58,7 +58,7 @@ bool Assemble::Assembler::AssembleFromTree(const ParseTree* tree, const std::str
 			if (i == j) continue;
 
 			if (sects[i].doesExist && sects[j].doesExist) {
-				if (int overlapLength = CalcIntersectionLenght(sects[i].offset, sects[j].offset, sects[i].offset + sects[i].size, sects[j].offset + sects[j].size);
+				if (int overlapLength = CalcIntersectionLenght(sects[i].offset, sects[j].offset, (int)(sects[i].offset + sects[i].size), (int)(sects[j].offset + sects[j].size));
 					overlapLength != -1) {
 					fmt::print(fg(fmt::color::crimson), "[Error]: Section {0} colliding with section {1}. Sections overlaping by {2} bytes. Fragmentation is not supported as now.\n", MapIndexToSection(i), MapIndexToSection(j), overlapLength);
 					CloseHandle(m_ExecutableHandle);
@@ -88,7 +88,7 @@ bool Assemble::Assembler::AssembleFromTree(const ParseTree* tree, const std::str
 			return false;
 		}
 
-		lastEnd = offset + sects[i].size;
+		lastEnd = (int)(offset + sects[i].size);
 	}
 
 	if (!MatchLabels()) {
