@@ -8,6 +8,7 @@ Is the official assembler for the 8-Bit microprocessor [Monty08](https://github.
 - Virtual instructions emulated on the CPU that expand the ISA of the Monty08
 - Adjustable output and code size
 - verbose syntax checkup of source file
+- Logisim hex output so the program can be loaded into Logisim components
 
 ## How to use
 ### Building
@@ -25,6 +26,8 @@ Possible arguments:
         -o, --output:           An absolut or relative path to the file that gets outputted.
         -s, --size:             Size of the compiled binary program.
         -c, --code:             Size of the text section (code).
+        -l, --logisim:          Adds "v2.0 raw" to the binary so it
+                                can be loaded into Logisim projects.
 ```
 
 The assembler then parses the given source file and assembles it into a ```.m08``` file, as defined using the ```-o``` argument.
