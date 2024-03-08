@@ -58,7 +58,7 @@ _loop:
 	end
 	nop
 ```
-Instrucions starting with a ```#``` indicate a preprocessor directive that gets parsed before the main parsing cylce and contain meta-information about the program itself.
+Instructions starting with a ```#``` indicate a preprocessor directive that gets parsed before the main parsing cycle and contain meta-information about the program itself.
 
 ---
 ### General conventions and formats
@@ -84,7 +84,7 @@ Instrucions starting with a ```#``` indicate a preprocessor directive that gets 
 ### Organization
 **Syntax:** ```org [section] [numeric_offset]```
 
-**Description:** Defines the offset at which a specific section begins. Offset = 0 means the section starts at address 0 of the program.
+**Description:** Defines the offset at which a specific section begins. Offset = 0 means the section starts at address 0 of the program. Be aware of possible conflicts between two or more sections that collide.
 
 ---
 ### Labels
@@ -94,10 +94,10 @@ Instrucions starting with a ```#``` indicate a preprocessor directive that gets 
 
 ---
 ### Sections
-**Syntax:** ```section [section]:```
+**Syntax:** ```section [section]```
 
 **Description:** Introduces one of the three sections: [.text/.bss/.data]. The program stays in the same section until a new section is introduced.
-*BSS*: uninitialized data, *DATA*: data initializied with a non zero value, *TEXT*: code of the program
+*BSS*: uninitialized data (only ```resb``` is valid in this section), *DATA*: data initializied with a non zero value (only ```db``` is valid in this section), *TEXT*: code of the program
 
 ---
 ### Define-Bytes
