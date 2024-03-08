@@ -10,7 +10,7 @@
 #include <fmt/color.h>
 
 namespace Assemble {
-	void Assemble(const std::string& path, const std::string& binaries) {
+	void Assemble(const std::string& path, const std::string& binaries, size_t progSize, size_t codeSize) {
 		Parser ps{};
 		ps.LoadFromFile(path);
 		if (!ps.Parse(true)) std::cout << "=> The parsing process has been aborted. There might be more errors.\n";
@@ -18,6 +18,7 @@ namespace Assemble {
 			if (!ps.Parse(false)) std::cout << "=> The parsing process has been aborted. There might be more errors.\n";
 			else {
 				Assembler as{};
+				as.SetData(progSize, codeSize);
 				if (!as.AssembleFromTree(ps.getTree(), binaries)) std::cout << "=> The assembly process has been aborted.\n";
 				else {
 					fmt::print(fg(fmt::color::green), "=> Successfully assembled binaries for {}\n", path);

@@ -16,6 +16,7 @@ namespace Assemble {
 		~Assembler() = default;
 
 		bool AssembleFromTree(const ParseTree* tree, const std::string& outFile);
+		inline void SetData(size_t progSize, size_t codeSize) { m_MaxProgAdr = progSize; m_MaxProgSize = codeSize; }
 
 	private:
 		struct BinaryOperand {

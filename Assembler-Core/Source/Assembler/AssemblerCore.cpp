@@ -304,7 +304,7 @@ bool Assemble::Assembler::MatchLabels()
 			const char higher = (char)(pos >> 8);
 			m_ExecutableHandle.write(&higher, 1);
 
-			if (lower == 0 && higher == 0) {
+			if (lower + 1 == 0 && higher == 0) {
 				fmt::print(fg(fmt::color::crimson), "[Error]: A jump to address 0 (label \"{}\") is not supported. To fix this error insert a 'nop' at the start of your program or move the affected section.\n", gap.second);
 				return false;
 			}
