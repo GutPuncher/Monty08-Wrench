@@ -17,6 +17,9 @@ namespace Assemble {
 
 		bool AssembleFromTree(const ParseTree* tree, const std::string& outFile);
 		inline void SetData(size_t progSize, size_t codeSize) { m_MaxProgAdr = progSize; m_MaxProgSize = codeSize; }
+		void ToggleLogisimOut(bool val) { m_LogisimOut = val; }
+
+		bool GenerateLogisim();
 
 	private:
 		struct BinaryOperand {
@@ -51,6 +54,9 @@ namespace Assemble {
 	private:
 		size_t m_MaxProgAdr = 0x0100;
 		size_t m_MaxProgSize = 0x0020;
+
+		bool m_LogisimOut = false;
+		std::string m_OutPath;
 
 		size_t m_BufferPtr = 0;
 

@@ -5,6 +5,7 @@
 
 #include <iterator>
 #include <algorithm>
+#include <iomanip>
 
 bool Assemble::Assembler::AssembleFromTree(const ParseTree* tree, const std::string& outFile)
 {
@@ -68,6 +69,7 @@ bool Assemble::Assembler::AssembleFromTree(const ParseTree* tree, const std::str
 		}
 	}
 
+	m_OutPath = outFile;
 	m_ExecutableHandle = std::ofstream(outFile, std::ios::binary);
 	if (!m_ExecutableHandle.is_open()) {
 		fmt::print(fg(fmt::color::crimson), "Cannot open file {}\n", outFile);
@@ -96,6 +98,36 @@ bool Assemble::Assembler::AssembleFromTree(const ParseTree* tree, const std::str
 	}
 
 	CloseHandle(m_ExecutableHandle);
+
+	return true;
+}
+
+bool Assemble::Assembler::GenerateLogisim()
+{
+	fmt::print("Generating Logisim output.\n");
+
+	std::ifstream inFile(m_OutPath, std::ios::binary);
+	std::ofstream outFile(m_OutPath + "ls");
+
+	if (!inFile) {
+		fmt::print(fg(fmt::color::crimson), "[Error]: Could not read file {}.\n", m_OutPath);
+		return false;
+	}
+
+	if (!outFile) {
+		fmt::print(fg(fmt::color::crimson), "[Error]: Could not read file {}.\n", m_OutPath + "ls");
+		return false;
+	}
+
+	outFile << "v2.0 raw\n";
+
+	char byte;
+	while (inFile.get(byte)) {
+		outFile << std::hex << std::setw(2) << std::setfill('0') << (int)(unsigned char)byte << " ";
+	}
+
+	inFile.close();
+	outFile.close();
 
 	return true;
 }

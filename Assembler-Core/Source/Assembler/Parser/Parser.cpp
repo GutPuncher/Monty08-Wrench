@@ -158,13 +158,13 @@ void Assemble::Parser::SetupRules()
 	m_RulePreprocessRegistry.push_back((SyntaxRule*)(Rule::PreprocessorDirective*) new Rule::ALIGN(&m_Tree.preproc_align));
 	m_RulePreprocessRegistry.push_back((SyntaxRule*)(Rule::PreprocessorDirective*) new Rule::DEFINE(&m_Tree.preproc_define));
 
-	// Parsing
-	m_RuleRegistry.push_back((SyntaxRule*) new Rule::ORG(&m_Tree.organizes));
-	m_RuleRegistry.push_back(new Rule::Section(nullptr));
+	// Parsing -- Ordered by propability of usage
 	m_RuleRegistry.push_back(new Rule::Label(&m_Tree.labels));
+	m_RuleRegistry.push_back(new Rule::InstructionDir(&m_Tree.sec_text.code));
 	m_RuleRegistry.push_back(new Rule::DefineByte(&m_Tree.sec_data.data));
 	m_RuleRegistry.push_back(new Rule::ReserveByte(&m_Tree.sec_bss.dataRes));
-	m_RuleRegistry.push_back(new Rule::InstructionDir(&m_Tree.sec_text.code));
+	m_RuleRegistry.push_back(new Rule::Section(nullptr));
+	m_RuleRegistry.push_back((SyntaxRule*) new Rule::ORG(&m_Tree.organizes));
 }
 
 inline bool Assemble::Parser::MatchRuleSection(const std::vector<AlignDir::Section>& sections) const
