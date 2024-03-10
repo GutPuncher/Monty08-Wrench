@@ -1,0 +1,21 @@
+
+org .data 5800h
+
+section .data
+_digits:
+	db 11111110b 11111101b 11111011b 11110111b 11101111b 11011111b 10111111b 01111111b
+
+section .text
+	one
+	portwrt p0
+	portwrt p1
+	
+_loop:
+	// 0001 0100 0000 0100
+	modr 04h
+	
+	// 
+	ldahpi r0
+	portwrt p0
+	
+	jmp [loop]	

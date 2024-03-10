@@ -16,7 +16,7 @@ namespace Assemble {
 		~Assembler() = default;
 
 		bool AssembleFromTree(const ParseTree* tree, const std::string& outFile);
-		inline void SetData(size_t progSize, size_t codeSize) { m_MaxProgAdr = progSize; m_MaxProgSize = codeSize; }
+		inline void SetData(size_t progSize, size_t codeSize) { m_ExecutableSize = progSize; m_MaxTextSecSize = codeSize; }
 		void ToggleLogisimOut(bool val) { m_LogisimOut = val; }
 
 		bool GenerateLogisim();
@@ -52,13 +52,13 @@ namespace Assemble {
 		bool MatchLabels();
 
 	private:
-		size_t m_MaxProgAdr = 0x0100;
-		size_t m_MaxProgSize = 0x0020;
+		inline static size_t m_ExecutableSize;
+		inline static size_t m_MaxTextSecSize;
 
 		bool m_LogisimOut = false;
 		std::string m_OutPath;
 
-		size_t m_BufferPtr = 0;
+		inline static size_t m_BufferPtr;
 
 		std::ofstream m_ExecutableHandle;
 

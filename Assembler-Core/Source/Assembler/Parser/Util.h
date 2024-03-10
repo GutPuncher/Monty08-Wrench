@@ -40,26 +40,36 @@ namespace Assemble::Util {
 #endif
 
 		try {
-			if (std::isdigit(postfix) > 0) {
+			if (std::isdigit(postfix) > 0 && numberStr.find_first_not_of("0123456789") == std::string::npos) {
 				vro.value = static_cast<T>(std::atoll(numberStr.c_str()));
-			}
-			else if (postfix == 'd') {
-				vro.value = static_cast<T>(std::atoll(numberStr.substr(0, numberStr.size() - 1).c_str()));
 			}
 			else {
 				switch (postfix) {
+				case 'd':
+					if (numberStr.find_first_not_of("0123456789") >= numberStr.size() - 1) {
+						vro.value = static_cast<T>(std::atoll(numberStr.c_str()));
+						break;
+					}
 				case 'b':
-					vro.value = static_cast<T>(std::stoll(numberStr.c_str(), nullptr, 2));
-					break;
+					if (numberStr.find_first_not_of("01") >= numberStr.size() - 1) {
+						vro.value = static_cast<T>(std::stoll(numberStr.c_str(), nullptr, 2));
+						break;
+					}
 				case 'h':
-					vro.value = static_cast<T>(std::stoll(numberStr.c_str(), nullptr, 16));
-					break;
+					if (numberStr.find_first_not_of("0123456789abcdef") >= numberStr.size() - 1) {
+						vro.value = static_cast<T>(std::stoll(numberStr.c_str(), nullptr, 16));
+						break;
+					}
 				case 'o':
-					vro.value = static_cast<T>(std::stoll(numberStr.c_str(), nullptr, 8));
-					break;
+					if (numberStr.find_first_not_of("01234567") >= numberStr.size() - 1) {
+						vro.value = static_cast<T>(std::stoll(numberStr.c_str(), nullptr, 8));
+						break;
+					}
 				case 'q':
-					vro.value = static_cast<T>(std::stoll(numberStr.c_str(), nullptr, 4));
-					break;
+					if (numberStr.find_first_not_of("0123") >= numberStr.size() - 1) {
+						vro.value = static_cast<T>(std::stoll(numberStr.c_str(), nullptr, 4));
+						break;
+					}
 				default:
 					vro.isValid = false;
 				}

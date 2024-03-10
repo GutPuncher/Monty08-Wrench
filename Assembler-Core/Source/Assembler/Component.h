@@ -25,11 +25,11 @@ namespace Assemble {
 					fmt::print(fg(fmt::color::green), "=> Successfully assembled binaries for {}\n", path);
 				}
 
-				if (logisimOut && as.GenerateLogisim()) {
-					fmt::print(fg(fmt::color::green), "=> Successfully generated Logisim output for {}\n", path);
-				}
-				else {
-					std::cout << "=> Could not generate Logisim output.";
+				if (logisimOut) {
+					if (as.GenerateLogisim())
+						fmt::print(fg(fmt::color::green), "=> Successfully generated Logisim output for {}\n", path);
+					else
+						std::cout << "=> Could not generate Logisim output.";
 				}
 			}
 		}

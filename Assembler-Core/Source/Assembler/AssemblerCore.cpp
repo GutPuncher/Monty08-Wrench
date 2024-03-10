@@ -15,7 +15,7 @@ bool Assemble::Assembler::AssembleFromTree(const ParseTree* tree, const std::str
 
 	SectionInfo text{
 		AlignDir::Section::TEXT,
-		m_MaxProgSize,
+		m_MaxTextSecSize,
 		0,
 		true,
 		generateText
@@ -24,7 +24,7 @@ bool Assemble::Assembler::AssembleFromTree(const ParseTree* tree, const std::str
 	SectionInfo bss{
 		AlignDir::Section::BSS,
 		GetBssSize(tree),
-		(int)(m_MaxProgAdr - GetBssSize(tree)),
+		(int)(m_ExecutableSize - GetBssSize(tree)),
 		tree->sec_bss.dataRes.size() != 0,
 		generateBss
 	};
@@ -32,7 +32,7 @@ bool Assemble::Assembler::AssembleFromTree(const ParseTree* tree, const std::str
 	SectionInfo data{
 		AlignDir::Section::DATA,
 		GetDataSize(tree),
-		(int)(m_MaxProgAdr - GetDataSize(tree) - bss.size),
+		(int)(m_ExecutableSize - GetDataSize(tree) - bss.size),
 		tree->sec_data.data.size() != 0,
 		generateData
 	};
@@ -188,6 +188,8 @@ int Assemble::Assembler::CalcIntersectionLenght(int start0, int start1, int end0
 
 bool Assemble::Assembler::generateText(const ParseTree* tree, std::ofstream& stream, size_t& bufPtr, index& ind, registry& reg)
 {
+	size_t bufCache = bufPtr;
+
 	for (Instruction instr : tree->sec_text.code) {
 		char opbyte = instr.opcode;
 
@@ -233,6 +235,10 @@ bool Assemble::Assembler::generateText(const ParseTree* tree, std::ofstream& str
 		}
 	}
 
+	size_t fill = m_MaxTextSecSize - (bufPtr - bufCache);
+	std::fill_n(std::ostreambuf_iterator<char>(stream), fill, static_cast<char>(0x3F));
+	bufPtr += fill;
+
 	return true;
 }
 
@@ -276,7 +282,7 @@ char Assemble::Assembler::matchParamValToBin(Operand* op, Operand::Type type, ch
 		out = (char)static_cast<Op_Register*>(op)->reg;
 		break;
 	case Operand::Type::SYSTEM_CONSTANT:
-		out = static_cast<Op_SystemConstant*>(op)->value;
+		out = (char)static_cast<Op_SystemConstant*>(op)->value;
 		break;
 	case Operand::Type::NUMERIC:
 		out = (char)static_cast<Op_Numeric*>(op)->value;

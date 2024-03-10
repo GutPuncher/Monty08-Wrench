@@ -75,7 +75,7 @@ namespace Assemble {
 	};
 
 	struct Op_Register : public Operand {
-		enum class Register { R0 = 0, R1 = 1, NONE };
+		enum Register { R0 = 0, R1 = 1, NONE };
 
 		Op_Register(Register val) : reg(val) {}
 
@@ -91,7 +91,7 @@ namespace Assemble {
 	};
 
 	struct Op_Port : public Operand {
-		enum class Port { P0, P1, NONE };
+		enum Port { P0 = 0, P1 = 1, NONE };
 
 		Op_Port(Port val) : p(val) {}
 
