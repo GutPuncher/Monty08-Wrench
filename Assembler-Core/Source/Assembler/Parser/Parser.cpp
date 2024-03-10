@@ -63,7 +63,7 @@ bool Assemble::Parser::Parse(bool preprocess)
 
 		Util::split(Util::trim(std::string(line)), words, ' ');
 
-		if (line.size() < 3 || words.size() == 0 || line.find("\r") != std::string::npos) continue;
+		if (line.size() < 3 || words.size() == 0 || line.find("\r") != std::string::npos || line.find("//") != std::string::npos) continue;
 
 		bool unknownID = true;
 		for (SyntaxRule* rule : ruleset) {
