@@ -9,6 +9,7 @@ Is the official assembler for the 8-Bit microprocessor [Monty08](https://github.
 - Adjustable output and code size
 - verbose syntax checkup of source file
 - Logisim hex output so the program can be loaded into Logisim components
+- Comments
 
 ## How to use
 ### Building
@@ -36,30 +37,45 @@ The assembler then parses the given source file and assembles it into a ```.m08`
 As already mentioned the Assembly language is highly inspired by existing languages and covers the most important elements of them. The following example shows all the features contained in the M08-Language:
 
 ```
-#align .text 8
 #define register0 r0
+#align text 8
 
-org .text 8
+// Map data to heap memory
+org .data 5800h
 
 section .data
-_string:
-	db "this_is_a_string"
-	
+// States of port
+_digits:
+	db 11111110b 11111101b 11111011b 11110111b 11101111b 11011111b 10111111b 01111111b
+
 section .bss
 _data:
 	resb 10h
-			
+
 section .text
-	ldav 5
-	zero
+	// Init and counter
+	ldav 7
 	xchop
+	one
+	
+	portwrt p0
+	portwrt p1
 	
 _loop:
-	inc
-	jmpne [loop]
+	modr 04h
 	
-	end
-	nop
+	ldahpi r0
+	portwrt p0
+	
+	movar r0
+	cmp
+	
+	jmpne [loop]	
+	
+	// Reset memory pointer
+	ldrv r0 0
+	jmp [loop]
+
 ```
 Instructions starting with a ```#``` indicate a preprocessor directive that gets parsed before the main parsing cycle and contain meta-information about the program itself.
 
