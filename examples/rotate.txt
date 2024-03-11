@@ -1,0 +1,32 @@
+
+// Map data to heap memory
+org .data 5800h
+
+section .data
+// States of port
+_digits:
+	db 11111110b 11111101b 11111011b 11110111b 11101111b 11011111b 10111111b 01111111b
+
+section .text
+	// Init and counter
+	ldav 7
+	xchop
+	one
+	
+	portwrt p0
+	portwrt p1
+	
+_loop:
+	modr 04h
+	
+	ldahpi r0
+	portwrt p0
+	
+	movar r0
+	cmp
+	
+	jmpne [loop]	
+	
+	// Reset memory pointer
+	ldrv r0 0
+	jmp [loop]
