@@ -7,7 +7,7 @@
 #include <unordered_map>
 
 namespace Assemble {
-	typedef std::vector<std::pair<size_t, std::string>> registry;
+	typedef std::vector<std::tuple<size_t, std::string, bool>> registry;
 	typedef std::unordered_map<std::string, size_t> index;
 
 	class Assembler {
@@ -47,7 +47,7 @@ namespace Assemble {
 		static bool generateData(const ParseTree* tree, std::ofstream& stream, size_t& bufPtr, index& ind, registry& reg);
 
 		static char matchParamValToBin(Operand* op, Operand::Type type, char index = 0);
-		static BinaryOperand matchOpValToBin(Operand* op, Operand::Type type, registry& registry, size_t bufPtr);
+		static BinaryOperand matchOpValToBin(Operand* op, Operand::Type type, registry& registry, size_t bufPtr, char opcode = 0x00);
 
 		bool MatchLabels();
 

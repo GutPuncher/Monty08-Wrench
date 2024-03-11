@@ -12,7 +12,9 @@ section .text
 	
 _loop:
 	// 0001 0100 0000 0100
+	xchop
 	modr 04h
+	xchop
 	
 	// 
 	ldahpi r0

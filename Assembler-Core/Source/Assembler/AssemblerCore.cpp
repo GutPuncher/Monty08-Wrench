@@ -213,7 +213,7 @@ bool Assemble::Assembler::generateText(const ParseTree* tree, std::ofstream& str
 		stream << opbyte;
 
 		if (instr.op0.second) {
-			BinaryOperand binOp = matchOpValToBin(instr.op0.second, instr.op0.first, reg, bufPtr);
+			BinaryOperand binOp = matchOpValToBin(instr.op0.second, instr.op0.first, reg, bufPtr, opbyte);
 			if (!binOp) return false;
 			stream << binOp.binaries.first;
 			bufPtr++;
@@ -224,7 +224,7 @@ bool Assemble::Assembler::generateText(const ParseTree* tree, std::ofstream& str
 		}
 
 		if (instr.op1.second) {
-			BinaryOperand binOp = matchOpValToBin(instr.op1.second, instr.op1.first, reg, bufPtr);
+			BinaryOperand binOp = matchOpValToBin(instr.op1.second, instr.op1.first, reg, bufPtr, opbyte);
 			if (!binOp) return false;
 			stream << binOp.binaries.first;
 			bufPtr++;
@@ -294,14 +294,14 @@ char Assemble::Assembler::matchParamValToBin(Operand* op, Operand::Type type, ch
 	return out << index;
 }
 
-Assemble::Assembler::BinaryOperand Assemble::Assembler::matchOpValToBin(Operand* op, Operand::Type type, registry& registry, size_t bufPtr)
+Assemble::Assembler::BinaryOperand Assemble::Assembler::matchOpValToBin(Operand* op, Operand::Type type, registry& registry, size_t bufPtr, char opcode)
 {
 	BinaryOperand bin{ true };
 
 	switch (type) {
 	case Operand::Type::LABEL: {
 		Op_Label lab = *static_cast<Op_Label*>(op);
-		registry.push_back({ bufPtr, lab.label });
+		registry.push_back({ bufPtr, lab.label, opcode == 0x27 });
 		bin.wide = true;
 		break;
 	}
@@ -329,13 +329,14 @@ bool Assemble::Assembler::MatchLabels()
 {
 	std::streampos adr;
 	for (auto gap : m_LabelReg) {
-		adr = gap.first;
+		adr = std::get<0>(gap);
 		m_ExecutableHandle.seekp(adr);
 
-		auto iter = m_LabelIndex.find(gap.second);
+		auto iter = m_LabelIndex.find(std::get<1>(gap));
 		if (iter != m_LabelIndex.end()) {
-			size_t pos = m_LabelIndex.at(gap.second); // TODO: Optimize, use iterator to access adr
-			const char lower = (char)(pos - 1 & 0x00FF);
+			size_t pos = m_LabelIndex.at(std::get<1>(gap)); // TODO: Optimize, use iterator to access adr
+			char lower = (char)(pos & 0x00FF);
+			if (std::get<2>(gap) == false) lower--;
 			m_ExecutableHandle.write(&lower, 1);
 
 			adr += 1;
@@ -343,12 +344,12 @@ bool Assemble::Assembler::MatchLabels()
 			m_ExecutableHandle.write(&higher, 1);
 
 			if (lower + 1 == 0 && higher == 0) {
-				fmt::print(fg(fmt::color::crimson), "[Error]: A jump to address 0 (label \"{}\") is not supported. To fix this error insert a 'nop' at the start of your program or move the affected section.\n", gap.second);
+				fmt::print(fg(fmt::color::crimson), "[Error]: A jump to address 0 (label \"{}\") is not supported. To fix this error insert a 'nop' at the start of your program or move the affected section.\n", std::get<1>(gap));
 				return false;
 			}
 		}
 		else {
-			fmt::print(fg(fmt::color::crimson), "[Error]: The given symbol {0} could not resolved.\n", gap.second);
+			fmt::print(fg(fmt::color::crimson), "[Error]: The given symbol {0} could not resolved.\n", std::get<1>(gap));
 			return false;
 		}
 	}
