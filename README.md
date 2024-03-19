@@ -27,8 +27,8 @@ Possible arguments:
         -o, --output:           An absolut or relative path to the file that gets outputted.
         -s, --size:             Size of the compiled binary program.
         -c, --code:             Size of the text section (code).
-        -l, --logisim:          Adds "v2.0 raw" to the binary so it
-                                can be loaded into Logisim projects.
+        -l, --logisim:          Generates an additional hex file that can directly be loaded by Logisim.
+        -m, --nomc:             Uses the arithmetic instructions for the non-microcode ALU.
 ```
 
 The assembler then parses the given source file and assembles it into a ```.m08``` file, as defined using the ```-o``` argument.
