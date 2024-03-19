@@ -28,6 +28,8 @@ int main(int argc, char** argv) {
 	size_t codeSize = 0x4000;
 	bool ls = false;
 
+	bool microcode = true;
+
 	for (int i = 1; i < argc; i++) {
 		std::string arg = argv[i];
 
@@ -54,6 +56,9 @@ int main(int argc, char** argv) {
 			}
 			codeSize = (size_t)vro.value;
 		}
+		else if (arg == "-m" || arg == "-nomc") {
+			microcode = false;
+		}
 		else if (arg == "-l" || arg == "--logisim") {
 			ls = true;
 		}
@@ -66,7 +71,7 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	Assemble::Assemble(sourcePath, outPath, progSize, codeSize, ls);
+	Assemble::Assemble(sourcePath, outPath, progSize, codeSize, ls, microcode);
 
 	return 0;
 }
@@ -83,6 +88,7 @@ void printHelp() {
 	printArg("s", "size", "Size of the compiled binary program.");
 	printArg("c", "code", "Size of the text section (code).");
 	printArg("l", "logisim", "Generates an additional hex file that can directly be loaded by Logisim.");
+	printArg("m", "nomc", "Uses the arithmetic instructions for the non-microcode ALU.");
 }
 
 void printArg(const std::string& arg, const std::string& argVerb, const std::string& desc) {

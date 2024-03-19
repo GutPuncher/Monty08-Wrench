@@ -11,10 +11,10 @@
 #include <fmt/core.h>
 #include <fmt/color.h>
 
-Assemble::Parser::Parser()
+Assemble::Parser::Parser(bool microcode)
 {
 	SetupRules();
-	SetupInstructionData();
+	SetupInstructionData(microcode);
 }
 
 Assemble::Parser::~Parser()

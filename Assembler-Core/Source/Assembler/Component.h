@@ -10,8 +10,8 @@
 #include <fmt/color.h>
 
 namespace Assemble {
-	void Assemble(const std::string& path, const std::string& binaries, size_t progSize, size_t codeSize, bool logisimOut) {
-		Parser ps{};
+	void Assemble(const std::string& path, const std::string& binaries, size_t progSize, size_t codeSize, bool logisimOut, bool microcode) {
+		Parser ps{ microcode };
 		ps.LoadFromFile(path);
 		if (!ps.Parse(true)) std::cout << "=> The parsing process has been aborted. There might be more errors.\n";
 		else {

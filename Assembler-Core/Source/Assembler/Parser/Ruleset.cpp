@@ -270,16 +270,11 @@ Assemble::ParseEvent Assemble::Rule::InstructionDir::ParseLiteral(std::vector<st
 		auto addfield = info.addField;
 
 		if (field & 0b0010'0000) {
-			if (field & 0b0100'0000) {
-				instr.param0 = { Operand::Type::SYSTEM_CONSTANT, new Op_SystemConstant(field & 0b0001'0000) };
-			}
-			else {
-				instr.param1 = { Operand::Type::SYSTEM_CONSTANT, new Op_SystemConstant(field & 0b0001'0000) };
-			}
+			instr.param0 = { Operand::Type::SYSTEM_CONSTANT, new Op_SystemConstant(field & 0b0001'0000) };
 		}
 
 		if (addfield & 0b0000'0001) {
-			instr.param1 = { Operand::Type::SYSTEM_CONSTANT, new Op_SystemConstant(true) };
+			instr.param1 = { Operand::Type::SYSTEM_CONSTANT, new Op_SystemConstant(addfield & 0b0000'0010) };
 		}
 
 		bool isComplex = field & 0b1000'0000;

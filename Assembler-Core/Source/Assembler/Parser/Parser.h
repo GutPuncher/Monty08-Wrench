@@ -11,7 +11,7 @@ namespace Assemble {
 	class Parser
 	{
 	public:
-		Parser();
+		Parser(bool microcode = true);
 		~Parser();
 
 		bool LoadFromFile(const std::string path);

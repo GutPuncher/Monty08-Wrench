@@ -9,11 +9,12 @@ namespace Assemble {
 	struct InstructionInformation {
 		unsigned char opcode;
 
-		// complex sysconstind hassysconst sysconst p0 p1 o0 o1
+		// complex sysconstind hassysconst6 sysconst6 p0 p1 o0 o1
 		unsigned char operandBitfield;
 
 		unsigned char cylces;
 
+		// - - - -  - - sysconst7 hassysconst7
 		unsigned char addField;
 
 		bool isValid = true;
@@ -32,5 +33,5 @@ namespace Assemble {
 	inline std::unordered_map<std::string, InstructionInformation> instructions;
 
 	InstructionInformation getInstructionData(std::string& instrStr);
-	void SetupInstructionData();
+	void SetupInstructionData(bool microcode = true);
 }

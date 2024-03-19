@@ -17,24 +17,44 @@ Assemble::InstructionInformation Assemble::getInstructionData(std::string& instr
 	return *instruction;
 }
 
-void Assemble::SetupInstructionData()
+void Assemble::SetupInstructionData(bool microcode)
 {
-	// Arithmetic and Logic
-	instructions["add"] = { 0x00, 0b0000'0000, 3 };
-	instructions["addc"] = { 0x01, 0b0000'0000, 3 };
-	instructions["sub"] = { 0x02, 0b0000'0000, 3 };
-	instructions["subb"] = { 0x03, 0b0000'0000, 3 };
-	instructions["inc"] = { 0x04, 0b0000'0000, 3 };
-	instructions["dec"] = { 0x05, 0b0000'0000, 3 };
-	instructions["and"] = { 0x06, 0b0000'0000, 3 };
-	instructions["or"] = { 0x07, 0b0000'0000, 3 };
-	instructions["xor"] = { 0x08, 0b0000'0000, 3 };
-	instructions["zero"] = { 0x09, 0b0000'0000, 3 };
-	instructions["cpl"] = { 0x0A, 0b0000'0000, 3 };
-	instructions["one"] = { 0x0B, 0b0000'0000, 3 };
-	instructions["rl"] = { 0x0C, 0b0000'0000, 3 };
-	instructions["rlc"] = { 0x0D, 0b0000'0000, 3 };
-	instructions["cmp"] = { 0x0E, 0b0000'0000, 3 };
+	if (microcode) {
+		// Arithmetic and Logic
+		instructions["add"] = { 0x00, 0b0000'0000, 3 };
+		instructions["addc"] = { 0x01, 0b0000'0000, 3 };
+		instructions["sub"] = { 0x02, 0b0000'0000, 3 };
+		instructions["subb"] = { 0x03, 0b0000'0000, 3 };
+		instructions["inc"] = { 0x04, 0b0000'0000, 3 };
+		instructions["dec"] = { 0x05, 0b0000'0000, 3 };
+		instructions["and"] = { 0x06, 0b0000'0000, 3 };
+		instructions["or"] = { 0x07, 0b0000'0000, 3 };
+		instructions["xor"] = { 0x08, 0b0000'0000, 3 };
+		instructions["zero"] = { 0x09, 0b0000'0000, 3 };
+		instructions["cpl"] = { 0x0A, 0b0000'0000, 3 };
+		instructions["one"] = { 0x0B, 0b0000'0000, 3 };
+		instructions["rl"] = { 0x0C, 0b0000'0000, 3 };
+		instructions["rlc"] = { 0x0D, 0b0000'0000, 3 };
+		instructions["cmp"] = { 0x0E, 0b0000'0000, 3 };
+	}
+	else {
+		// Arithmetic and Logic
+		instructions["add"] = { 0x09, 0b0010'0000, 3, 0b0000'0001 };
+		instructions["addc"] = { 0x09, 0b0011'0000, 3, 0b0000'0001 };
+		instructions["sub"] = { 0x06, 0b0011'0000, 3, 0b0000'0001 };
+		instructions["subb"] = { 0x06, 0b0010'0000, 3, 0b0000'0001 };
+		instructions["inc"] = { 0x00, 0b0011'0000, 3, 0b0000'0001 };
+		instructions["dec"] = { 0x0F, 0b0010'0000, 3, 0b0000'0001 };
+		instructions["and"] = { 0x0B, 0b0011'0000, 3, 0b0000'0001 };
+		instructions["or"] = { 0x01, 0b0010'0000, 3, 0b0000'0001 };
+		instructions["xor"] = { 0x06, 0b0011'0000, 3, 0b0000'0011 };
+		instructions["zero"] = { 0x03, 0b0011'0000, 3, 0b0000'0001 };
+		instructions["cpl"] = { 0x00, 0b0011'0000, 3, 0b0000'0011 };
+		instructions["one"] = { 0x03, 0b0010'0000, 3, 0b0000'0001 };
+		instructions["rl"] = { 0x0C, 0b0000'0000, 3, 0b0000'0001 };
+		instructions["rlc"] = { 0x0D, 0b0000'0000, 3, 0b0000'0001 };
+		instructions["cmp"] = { 0x03, 0b0011'0000, 3, 0b0000'0001 };
+	}
 
 	// Transport
 	instructions["xchop"] = { 0x10, 0b0000'0000, 2 };
@@ -67,9 +87,9 @@ void Assemble::SetupInstructionData()
 	instructions["jmpe"] = { 0x2A, 0b1111'0011, 3 };
 
 	// --> Virtual Instructions
-	instructions["jmpnc"] = { 0x28, 0b1111'0011, 3, 0b0000'0001 };
-	instructions["jmpnz"] = { 0x29, 0b1111'0011, 3, 0b0000'0001 };
-	instructions["jmpne"] = { 0x2A, 0b1111'0011, 3, 0b0000'0001 };
+	instructions["jmpnc"] = { 0x28, 0b1111'0011, 3, 0b0000'0011 };
+	instructions["jmpnz"] = { 0x29, 0b1111'0011, 3, 0b0000'0011 };
+	instructions["jmpne"] = { 0x2A, 0b1111'0011, 3, 0b0000'0011 };
 
 	// I/O
 	instructions["portwrt"] = { 0x2C, 0b0000'1000, 2 };
